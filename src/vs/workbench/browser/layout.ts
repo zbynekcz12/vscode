@@ -48,6 +48,7 @@ import { AuxiliaryBarPart } from './parts/auxiliarybar/auxiliaryBarPart.js';
 import { ITelemetryService } from '../../platform/telemetry/common/telemetry.js';
 import { IAuxiliaryWindowService } from '../services/auxiliaryWindow/browser/auxiliaryWindowService.js';
 import { CodeWindow, mainWindow } from '../../base/browser/window.js';
+import { IEditorGroupView } from './parts/editor/editor.js';
 
 //#region Layout Implementation
 
@@ -1191,9 +1192,15 @@ export abstract class Layout extends Disposable implements IWorkbenchLayoutServi
 
 	getContainer(targetWindow: Window): HTMLElement;
 	getContainer(targetWindow: Window, part: Parts): HTMLElement | undefined;
-	getContainer(targetWindow: Window, part?: Parts): HTMLElement | undefined {
+	getContainer(editorGroup: GroupIdentifier): HTMLElement | undefined;
+	getContainer(targetWindowOrGroup: Window | GroupIdentifier, part?: Parts): HTMLElement | undefined {
+		if (typeof targetWindowOrGroup === 'number') {
+			return (this.editorGroupService.getGroup(targetWindowOrGroup) as IEditorGroupView).element;
+		}
+
+		const targetWindow = targetWindowOrGroup;
 		if (typeof part === 'undefined') {
-			return this.getContainerFromDocument(targetWindow.document);
+			return this.getContainerFromDocument((targetWindowOrGroup as Window).document);
 		}
 
 		if (targetWindow === mainWindow) {

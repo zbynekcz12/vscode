@@ -15,6 +15,7 @@ import { CustomTitleBarVisibility, TitleBarSetting, getMenuBarVisibility, hasCus
 import { isFullscreen, isWCOEnabled } from '../../../../base/browser/browser.js';
 import { IConfigurationService } from '../../../../platform/configuration/common/configuration.js';
 import { IDisposable } from '../../../../base/common/lifecycle.js';
+import { GroupIdentifier } from '../../../common/editor.js';
 
 export const IWorkbenchLayoutService = refineServiceDecorator<ILayoutService, IWorkbenchLayoutService>(ILayoutService);
 
@@ -202,8 +203,9 @@ export interface IWorkbenchLayoutService extends ILayoutService {
 	focusPart(part: Parts, targetWindow: Window): void;
 
 	/**
-	 * Returns the target window container or parts HTML element within, if there is one.
+	 * Returns the target window container, parts or editor group HTML element within, if there is one.
 	 */
+	getContainer(editorGroup: GroupIdentifier): HTMLElement | undefined;
 	getContainer(targetWindow: Window): HTMLElement;
 	getContainer(targetWindow: Window, part: Parts): HTMLElement | undefined;
 
