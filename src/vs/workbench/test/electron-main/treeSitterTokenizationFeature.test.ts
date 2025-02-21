@@ -376,12 +376,13 @@ class y {
 		await updatePromise;
 		assert.ok(change);
 
+		const ranges = change.ranges['typescript'];
 		assert.strictEqual(change.versionId, 4);
-		assert.strictEqual(change.ranges[0].newRangeStartOffset, 7);
-		assert.strictEqual(change.ranges[0].newRangeEndOffset, 32);
-		assert.strictEqual(change.ranges[0].newRange.startLineNumber, 2);
-		assert.strictEqual(change.ranges[0].newRange.endLineNumber, 7);
-		assert.strictEqual(change.ranges[0].oldRangeLength, 28);
+		assert.strictEqual(ranges[0].newRangeStartOffset, 7);
+		assert.strictEqual(ranges[0].newRangeEndOffset, 32);
+		assert.strictEqual(ranges[0].newRange.startLineNumber, 2);
+		assert.strictEqual(ranges[0].newRange.endLineNumber, 7);
+		assert.strictEqual(ranges[0].oldRangeLength, 28);
 
 		updateListener?.dispose();
 		modelService.destroyModel(model.uri);
