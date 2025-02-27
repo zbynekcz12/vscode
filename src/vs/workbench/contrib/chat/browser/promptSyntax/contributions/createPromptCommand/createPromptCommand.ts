@@ -55,7 +55,6 @@ const command = async (
 	const fileService = accessor.get(IFileService);
 	const labelService = accessor.get(ILabelService);
 	const openerService = accessor.get(IOpenerService);
-	const commandService = accessor.get(ICommandService);
 	const promptsService = accessor.get(IPromptsService);
 	const quickInputService = accessor.get(IQuickInputService);
 	const workspaceService = accessor.get(IWorkspaceContextService);
@@ -87,7 +86,7 @@ const command = async (
 		folder: selectedFolder,
 		content,
 		fileService,
-		commandService,
+		openerService,
 	});
 
 	await openerService.open(promptUri);
