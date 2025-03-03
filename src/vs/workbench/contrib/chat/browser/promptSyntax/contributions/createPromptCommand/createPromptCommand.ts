@@ -12,7 +12,6 @@ import { IFileService } from '../../../../../../../platform/files/common/files.j
 import { ILabelService } from '../../../../../../../platform/label/common/label.js';
 import { IOpenerService } from '../../../../../../../platform/opener/common/opener.js';
 import { PromptsConfig } from '../../../../../../../platform/prompts/common/config.js';
-import { ICommandService } from '../../../../../../../platform/commands/common/commands.js';
 import { IPromptPath, IPromptsService } from '../../../../common/promptSyntax/service/types.js';
 import { appendToCommandPalette } from '../../../../../files/browser/fileActions.contribution.js';
 import { IQuickInputService } from '../../../../../../../platform/quickinput/common/quickInput.js';
