@@ -21,17 +21,18 @@ export class ScopedAccountAccess implements IAccountAccess {
 	private value = new Array<string>();
 
 	constructor(
-		private readonly _secretStorage: SecretStorage,
-		private readonly _cloudName: string,
-		private readonly _clientId: string,
-		private readonly _authority: string
+		secretStorage: SecretStorage,
+		cloudName: string,
+		clientId: string,
+		authoritiesToMigrate?: string[],
 	) {
-		this._accountAccessSecretStorage = new AccountAccessSecretStorage(this._secretStorage, this._cloudName, this._clientId, this._authority);
+		this._accountAccessSecretStorage = new AccountAccessSecretStorage(secretStorage, cloudName, clientId, authoritiesToMigrate);
 		this._accountAccessSecretStorage.onDidChange(() => this.update());
 	}
 
-	initialize() {
-		return this.update();
+	async initialize() {
+		await this._accountAccessSecretStorage.migrate();
+		await this.update();
 	}
 
 	isAllowedAccess(account: AccountInfo): boolean {
@@ -46,7 +47,15 @@ export class ScopedAccountAccess implements IAccountAccess {
 			await this._accountAccessSecretStorage.store([...this.value, account.homeAccountId]);
 			return;
 		}
-		await this._accountAccessSecretStorage.store(this.value.filter(id => id !== account.homeAccountId));
+		const newValue = this.value.filter(id => id !== account.homeAccountId);
+		if (newValue.length === this.value.length) {
+			return;
+		}
+		if (newValue.length) {
+			await this._accountAccessSecretStorage.store(newValue);
+		} else {
+			await this._accountAccessSecretStorage.delete();
+		}
 	}
 
 	private async update() {
@@ -66,13 +75,13 @@ export class AccountAccessSecretStorage {
 	private readonly _onDidChangeEmitter = new EventEmitter<void>;
 	readonly onDidChange: Event<void> = this._onDidChangeEmitter.event;
 
-	private readonly _key = `accounts-${this._cloudName}-${this._clientId}-${this._authority}`;
+	private readonly _key = `accounts-${this._cloudName}`;
 
 	constructor(
 		private readonly _secretStorage: SecretStorage,
 		private readonly _cloudName: string,
 		private readonly _clientId: string,
-		private readonly _authority: string
+		private readonly _authoritiesToMigrate?: string[]
 	) {
 		this._disposable = Disposable.from(
 			this._onDidChangeEmitter,
@@ -84,20 +93,40 @@ export class AccountAccessSecretStorage {
 		);
 	}
 
+	/**
+	 * TODO: Remove this method after a release with the migration
+	 */
+	async migrate(): Promise<void> {
+		if (!this._authoritiesToMigrate) {
+			return;
+		}
+		const current = await this.get();
+		if (!current) {
+			return;
+		}
+		for (const authority of this._authoritiesToMigrate) {
+			const oldKey = `accounts-${this._cloudName}-${this._clientId}-${authority}`;
+			const value = await this._secretStorage.get(oldKey);
+			if (value) {
+				await this.store([...new Set([...current, ...JSON.parse(value)])]);
+			}
+		}
+	}
+
 	async get(): Promise<string[] | undefined> {
 		const value = await this._secretStorage.get(this._key);
-		if (!value) {
-			return undefined;
+		if (value) {
+			return JSON.parse(value);
 		}
-		return JSON.parse(value);
+		return undefined;
 	}
 
-	store(value: string[]): Thenable<void> {
-		return this._secretStorage.store(this._key, JSON.stringify(value));
+	async store(value: string[]): Promise<void> {
+		await this._secretStorage.store(this._key, JSON.stringify(value));
 	}
 
-	delete(): Thenable<void> {
-		return this._secretStorage.delete(this._key);
+	async delete(): Promise<void> {
+		await this._secretStorage.delete(this._key);
 	}
 
 	dispose() {
