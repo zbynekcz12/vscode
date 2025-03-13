@@ -160,5 +160,16 @@
 		"*": "error",
 		"ts": "warning",
 		"eslint": "warning"
-	}
+	},
+	"anycode.language.features": {
+		"diagnostics": true,
+		"folding": true
+	},
+	"search.useIgnoreFiles": false,
+	"problems.decorations.enabled": false,
+	"problems.autoReveal": false,
+	"problems.defaultViewMode": "table",
+	"problems.sortOrder": "position",
+	"debug.allowBreakpointsEverywhere": true,
+	"debug.autoExpandLazyVariables": "on"
 }
